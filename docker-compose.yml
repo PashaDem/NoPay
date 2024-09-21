@@ -1,0 +1,35 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh django-entrypoint.sh
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./src:/src
+    env_file:
+      - .env
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+    restart: always
+
+  postgres_db:
+    container_name: postgres_db
+    image: postgres:16
+    ports:
+      - "5000:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  postgres_data:
+    driver: local
