@@ -20,7 +20,7 @@ class RegisterUserAPIView(APIView):
 
         token, _ = Token.objects.get_or_create(user=user)
         return Response(
-            data=serializer.data | {'user_id': user.id, 'access_token': token.key},
+            data={'user_id': user.id, 'access_token': token.key},
             status=status.HTTP_201_CREATED,
         )
 
