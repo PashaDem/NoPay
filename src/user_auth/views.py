@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework.generics import get_object_or_404
 from rest_framework.views import APIView
-from .serializers import RegisterUserSerializer
+from .serializers import RegisterUserSerializer, UserLoginSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authtoken.models import Token
@@ -26,12 +26,12 @@ class RegisterUserAPIView(APIView):
 
 
 class LoginUserAPIView(APIView):
-    serializer_class = RegisterUserSerializer
+    serializer_class = UserLoginSerializer
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = get_object_or_404(User)
+        user = get_object_or_404(User, username=serializer.validated_data['username'])
 
         if user.check_password(serializer.validated_data["password"]):
             token, created = Token.objects.get_or_create(user=user)
@@ -44,5 +44,6 @@ class LoginUserAPIView(APIView):
             )
         else:
             return Response(
-                "Такого пользователя не существует.", status=status.HTTP_400_BAD_REQUEST,
+                "Такого пользователя не существует.",
+                status=status.HTTP_400_BAD_REQUEST,
             )
