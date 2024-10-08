@@ -30,6 +30,17 @@ services:
       timeout: 3s
       retries: 3
 
+  minio:
+    image: quay.io/minio/minio:latest
+    volumes:
+      - ./data:/data
+    ports:
+      - 9000:9000
+      - 9001:9001
+    env_file:
+      - .env
+    command: minio server /data
+
 volumes:
   postgres_data:
     driver: local
