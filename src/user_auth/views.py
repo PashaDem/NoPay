@@ -1,14 +1,15 @@
+import rest_framework.serializers as serializers
 from django.contrib.auth import get_user_model
-from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiResponse
-from rest_framework.generics import get_object_or_404
-from rest_framework.views import APIView
-from .serializers import RegisterUserSerializer, UserLoginSerializer
-from rest_framework.response import Response
-import  rest_framework.serializers as serializers
+from django.db import transaction
+from drf_spectacular.utils import OpenApiResponse, extend_schema, inline_serializer
 from rest_framework import status
 from rest_framework.authtoken.models import Token
+from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from django.db import transaction
+from .serializers import RegisterUserSerializer, UserLoginSerializer
+
 User = get_user_model()
 
 
@@ -38,7 +39,7 @@ class RegisterUserAPIView(APIView):
 
         token, _ = Token.objects.get_or_create(user=user)
         return Response(
-            data={'user_id': user.id, 'access_token': token.key},
+            data={"user_id": user.id, "access_token": token.key},
             status=status.HTTP_201_CREATED,
         )
 
@@ -58,14 +59,16 @@ class LoginUserAPIView(APIView):
                     "access_token": serializers.CharField(),
                 },
             ),
-            status.HTTP_400_BAD_REQUEST: OpenApiResponse(description='Такого пользователя не существует.'),
+            status.HTTP_400_BAD_REQUEST: OpenApiResponse(
+                description="Такого пользователя не существует."
+            ),
             status.HTTP_404_NOT_FOUND: None,
         },
     )
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = get_object_or_404(User, username=serializer.validated_data['username'])
+        user = get_object_or_404(User, username=serializer.validated_data["username"])
 
         if user.check_password(serializer.validated_data["password"]):
             token, created = Token.objects.get_or_create(user=user)

@@ -1,5 +1,5 @@
-from pathlib import Path
 from os import environ
+from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -9,13 +9,9 @@ DEBUG = environ.get("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
-APPS = (
-    "user_auth.apps.UserAuthConfig",
-)
+APPS = ("user_auth.apps.UserAuthConfig",)
 
-APPS = (
-    "user_auth.apps.UserAuthConfig",
-)
+APPS = ("user_auth.apps.UserAuthConfig",)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -105,10 +101,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # REST SETTINGS
 
 REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
+    "DEFAULT_AUTHENTICATION_CLASSES": [
         # 'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
+        "rest_framework.authentication.TokenAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     ],
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
