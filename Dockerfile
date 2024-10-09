@@ -1,13 +1,15 @@
 FROM python:3.11-slim
 
-ENV PYTHONUNBUFFERED 1 \
-    POETRY_VERSION=1.4.2
+ENV PYTHONUNBUFFERED 1
 
 WORKDIR /app
 
-COPY ./requirements.txt .
+RUN pip3 install poetry
+RUN poetry config virtualenvs.create false
 
-RUN pip3 install -r requirements.txt
+COPY pyproject.toml poetry.lock ./
+
+RUN poetry install --no-root --only main
 
 COPY src/django-entrypoint.sh .
 RUN chmod +x django-entrypoint.sh
