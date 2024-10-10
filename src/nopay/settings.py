@@ -9,9 +9,10 @@ DEBUG = environ.get("DEBUG")
 
 ALLOWED_HOSTS = ["*"]
 
-APPS = ("user_auth.apps.UserAuthConfig",)
-
-APPS = ("user_auth.apps.UserAuthConfig",)
+APPS = (
+    "user_auth.apps.UserAuthConfig",
+    "qrcode_app.apps.QrcodeAppConfig",
+)
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -24,6 +25,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "rest_framework.authtoken",
     "drf_spectacular",
+    "django_extensions",
     *APPS,
 ]
 
@@ -108,3 +110,10 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
+
+# Minio settings
+MINIO_HOST = "minio:9000"
+MINIO_DJANGO_USER = environ.get("MINIO_DJANGO_USER")
+MINIO_DJANGO_PASSWORD = environ.get("MINIO_DJANGO_PASSWORD")
+MINIO_BUCKET_NAME = "qrcodes"

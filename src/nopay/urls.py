@@ -12,4 +12,8 @@ urlpatterns = (
         SpectacularSwaggerView.as_view(url_name="schema"),
         name="swagger-ui",
     ),
+    path(
+        "api/qrcode/",
+        include("qrcode_app.urls"),
+    ),
 )
