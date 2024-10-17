@@ -100,7 +100,7 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Donwloading files into celery
-DOWNLOAD_DIR = "./temp"
+DOWNLOAD_DIR = "/usr/src/app/files/"
 
 
 # REST SETTINGS

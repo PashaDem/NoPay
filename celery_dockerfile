@@ -19,5 +19,7 @@ COPY src/celery-entrypoint.sh .
 RUN chmod +x celery-entrypoint.sh
 
 ENV PYTHONPATH=/usr/src/app
+RUN mkdir -p /usr/src/app/files
+RUN chmod 777 /usr/src/app/files
 
 COPY src .

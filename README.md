@@ -10,3 +10,6 @@ Backend for NoPay
 В запросе нужно указать header `Authorization: Token 9944b09199c62bcf9418ad846dd0e4bbdfc6ee4b`
 
 Токен возвращается с ручки авторизации в поле `access_token`
+
+
+# TODO: пофиксить redis insight + сделать: добавить volume так, чтобы при обновлении кода, происходило обновление контейнера внутри

@@ -6,8 +6,6 @@ services:
     command: sh django-entrypoint.sh
     ports:
       - "8000:8000"
-    volumes:
-      - ./src:/src
     env_file:
       - .env
     depends_on:

@@ -4,12 +4,15 @@ from datetime import datetime
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.conf import settings
+from django.contrib.auth import get_user_model
 
 from qrcode_app.models import QRCode
 
 from .minio_factory import MinioFileRepository
 
 logger = get_task_logger(__name__)
+
+User = get_user_model()
 
 
 def parse_qrcode(filename: str, user_id: int):
@@ -42,7 +45,7 @@ def parse_qrcode_task(filename: str, user_id: int) -> None:
         logger.error(err)
         return
 
-    QRCode.objects.create(**qrcode_payload, created_by=user_id)
+    QRCode.objects.create(**qrcode_payload, created_by=User.objects.get(id=user_id))
     repo.remove_file_from_blob(settings.MINIO_BUCKET_NAME, filename)
 
 
