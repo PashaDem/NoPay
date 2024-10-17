@@ -4,7 +4,7 @@ from django.conf import settings
 from minio import Minio
 from minio.error import S3Error
 
-from .errors import UploadFileError
+from .errors import DownloadFileError, RemoveFileError, UploadFileError
 
 logger = getLogger(__name__)
 
@@ -41,3 +41,25 @@ class MinioFileRepository:
         """
         objs = self.client.list_objects(bucket)
         return not any(filename == obj_name for obj_name in objs)
+
+    def download_file_from_blob(self, bucket: str, filename: str) -> str:
+        """
+        :raises DownloadFileError: не удалось скачать файл из blob-хранилища
+        :return: путь к скачанному файлу
+        """
+        try:
+            self.client.fget_object(bucket, filename, settings.DOWNLOAD_DIR + filename)
+            return settings.DOWNLOAD_DIR + filename
+        except S3Error as err:
+            logger.error(err)
+            raise DownloadFileError from None
+
+    def remove_file_from_blob(self, bucket: str, filename: str):
+        """
+        :raises RemoveFileError: не удалось удалить файл из blob-хранилища
+        """
+        try:
+            self.client.remove_object(bucket, filename)
+        except S3Error as err:
+            logger.error(err)
+            raise RemoveFileError from None

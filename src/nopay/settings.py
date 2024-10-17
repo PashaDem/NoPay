@@ -99,6 +99,9 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# Donwloading files into celery
+DOWNLOAD_DIR = "./temp"
+
 
 # REST SETTINGS
 
@@ -117,3 +120,8 @@ MINIO_HOST = "minio:9000"
 MINIO_DJANGO_USER = environ.get("MINIO_DJANGO_USER")
 MINIO_DJANGO_PASSWORD = environ.get("MINIO_DJANGO_PASSWORD")
 MINIO_BUCKET_NAME = "qrcodes"
+
+
+# Celery
+CELERY_BROKER_URL = "redis://redis:6379"
+CELERY_RESULT_BACKEND = "redis://redis:6379"

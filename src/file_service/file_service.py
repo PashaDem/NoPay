@@ -4,6 +4,7 @@ from uuid import uuid1
 from django.conf import settings
 
 from .file_repo import IFileRepository
+from .parse_qrcode import parse_qrcode
 
 
 class FileService:
@@ -25,3 +26,5 @@ class FileService:
         self.repo.upload_file_to_blob(
             file_obj, settings.MINIO_BUCKET_NAME, dest_filename
         )
+
+        parse_qrcode(dest_filename, user_id)
