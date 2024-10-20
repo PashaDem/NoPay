@@ -5,8 +5,12 @@ ENV PYTHONUNBUFFERED 1
 WORKDIR /usr/src/app
 
 RUN apt-get update -y
-# Get's shared library for zbar
-RUN apt-get install -y libzbar0
+# shared library for zbar - for parsing qrcode
+RUN apt install -y libzbar0
+# движок для парсинга текста
+RUN apt install -y tesseract-ocr
+# для русского языка
+RUN apt-get install -y tesseract-ocr-rus
 
 RUN pip3 install poetry
 RUN poetry config virtualenvs.create false

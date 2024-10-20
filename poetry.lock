@@ -977,6 +977,25 @@ files = [
 ]
 
 [[package]]
+name = "pyocr"
+version = "0.8.5"
+description = "A Python wrapper for OCR engines (Tesseract, Cuneiform, etc)"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pyocr-0.8.5-py3-none-any.whl", hash = "sha256:3a534eee5ac6ce681159d67528b8953f0f2a7a5aad8733373ea7b3e8ac13a0b4"},
+    {file = "pyocr-0.8.5.tar.gz", hash = "sha256:eff33d95032426a92640e56fa0d71b496ee531c1d341a15cc610610a7c5eac55"},
+]
+
+[package.dependencies]
+Pillow = "*"
+
+[package.extras]
+dev = ["pytest"]
+lint = ["flake8"]
+
+[[package]]
 name = "python-dateutil"
 version = "2.9.0.post0"
 description = "Extensions to the standard Python datetime module"
@@ -1348,4 +1367,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "8626fc8b7b8e13a12db9377a4b1a7e23443d6ebd7328a0d151efb31452dee3ab"
+content-hash = "c595169577fd5309721d1229f988e2c224ea95341e824b20e41add3c1d748a03"
