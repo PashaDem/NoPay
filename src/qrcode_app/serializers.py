@@ -10,4 +10,30 @@ class UploadQRCodeSerializer(s.Serializer):
 class PublicTicketSerializer(s.ModelSerializer):
     class Meta:
         model = QRCode
-        fields = ("registration_sign", "transport_id")
+        fields = ("id", "registration_sign", "transport_id")
+
+
+class QRCodePrivateSerializer(s.ModelSerializer):
+    class Meta:
+        model = QRCode
+        fields = (
+            "ticket_id",
+            "transport_id",
+            "payment_date",
+            "payment_time",
+            "registration_sign",
+            "qr_token",
+        )
+
+
+class QRCodePublicSerializer(s.ModelSerializer):
+    class Meta:
+        model = QRCode
+        fields = (
+            "id",
+            "transport_id",
+            "registration_sign",
+            "ticket_id",
+            "payment_date",
+            "payment_time",
+        )
