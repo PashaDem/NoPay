@@ -6,14 +6,24 @@ services:
     command: sh django-entrypoint.sh
     ports:
       - "8000:8000"
-    volumes:
-      - ./src:/src
     env_file:
       - .env
     depends_on:
       postgres_db:
         condition: service_healthy
     restart: always
+
+  celery:
+    build:
+      context: .
+      dockerfile: celery_dockerfile
+    command: sh celery-entrypoint.sh
+    volumes:
+      - ./src:/src
+    env_file:
+      - .env
+    depends_on:
+      - web
 
   postgres_db:
     container_name: postgres_db
@@ -41,6 +51,24 @@ services:
       - .env
     command: minio server /data
 
+  redis:
+    image: redis:6.0.7
+    container_name: redis
+    restart: always
+    volumes:
+      - redis_volume_data:/data
+    ports:
+      - 6379:6379
+    env_file:
+      - .env
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "$REDIS_PASSWORD", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
 volumes:
   postgres_data:
     driver: local
+  redis_volume_data:
+  redis_insight_volume_data:

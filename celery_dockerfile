@@ -1,0 +1,29 @@
+FROM python:3.11-slim
+
+ENV PYTHONUNBUFFERED 1
+
+WORKDIR /usr/src/app
+
+RUN apt-get update -y
+# shared library for zbar - for parsing qrcode
+RUN apt install -y libzbar0
+# движок для парсинга текста
+RUN apt install -y tesseract-ocr
+# для русского языка
+RUN apt-get install -y tesseract-ocr-rus
+
+RUN pip3 install poetry
+RUN poetry config virtualenvs.create false
+
+COPY pyproject.toml poetry.lock ./
+
+RUN poetry install --no-root --with celery,main
+
+COPY src/celery-entrypoint.sh .
+RUN chmod +x celery-entrypoint.sh
+
+ENV PYTHONPATH=/usr/src/app
+RUN mkdir -p /usr/src/app/files
+RUN chmod 777 /usr/src/app/files
+
+COPY src .
