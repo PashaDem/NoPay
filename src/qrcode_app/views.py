@@ -1,22 +1,43 @@
-from rest_framework import status
+from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
+from rest_framework import serializers, status
+from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from image_service import FileService, MinioFileRepository, UploadFileError
-from qrcode_app.serializers import UploadQRCodeSerializer
+from qrcode_app.models import QRCode
+from qrcode_app.serializers import PublicTicketSerializer, UploadQRCodeSerializer
 
 
 class UploadQRCodeAPIView(APIView):
     serializer = UploadQRCodeSerializer
     permission_classes = (IsAuthenticated,)
 
+    @extend_schema(
+        summary="Подгрузка QR кода.",
+        tags=["qrcode"],
+        request={
+            "multipart/form-data": UploadQRCodeSerializer,
+        },
+        responses={
+            status.HTTP_200_OK: inline_serializer(
+                name="Сообщение об успешной загрузке QR кода",
+                fields={
+                    "message": serializers.CharField(),
+                },
+            ),
+            status.HTTP_400_BAD_REQUEST: inline_serializer(
+                name="Сообщение об ошибке загрузки QR кода",
+                fields={
+                    "message": serializers.CharField(
+                        default="Файл был успешно загружен"
+                    ),
+                },
+            ),
+        },
+    )
     def post(self, request):
-        """
-        This endpoint accepts a QR code image and
-        returns ticket_id, transport_id, payment_date, payment_time, registration_sign, qr_token.
-        The QR code image is expected to be in request.FILES['image'].
-        """
         serializer = self.serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -32,3 +53,16 @@ class UploadQRCodeAPIView(APIView):
             )
 
         return Response({"message": "Файл был успешно загружен"})
+
+
+@extend_schema_view(
+    list=extend_schema(
+        summary="Список доступных QR-кодов",
+        tags=["QRCODE"],
+        responses={status.HTTP_200_OK: PublicTicketSerializer(many=True)},
+    )
+)
+class QrCodeListView(ListAPIView):
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PublicTicketSerializer
+    queryset = QRCode.objects.all()
