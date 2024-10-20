@@ -1,4 +1,9 @@
-from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    extend_schema,
+    extend_schema_view,
+    inline_serializer,
+)
 from rest_framework import serializers, status
 from rest_framework.generics import ListAPIView
 from rest_framework.permissions import IsAuthenticated
@@ -59,6 +64,29 @@ class UploadQRCodeAPIView(APIView):
     list=extend_schema(
         summary="Список доступных QR-кодов",
         tags=["QRCODE"],
+        parameters=[
+            OpenApiParameter(
+                name="is_trolleybus",
+                location=OpenApiParameter.QUERY,
+                description='Используется для фильтрации вместе с query параметром "transport_number". 1 = true, 0 = false',
+                required=False,
+                type=int,
+            ),
+            OpenApiParameter(
+                name="transport_number",
+                location=OpenApiParameter.QUERY,
+                description='Публичный номер транспорта - 10, 25, который указывается на автобусе/троллейбусе. Используется только вместе с query параметром "is_trolleybus".',
+                required=False,
+                type=int,
+            ),
+            OpenApiParameter(
+                name="reg_sign",
+                location=OpenApiParameter.QUERY,
+                description="Фильтрует по полному названию регистрационного знака. Это значение находится под qr кодом в самом транспорте.",
+                required=False,
+                type=str,
+            ),
+        ],
         responses={status.HTTP_200_OK: PublicTicketSerializer(many=True)},
     )
 )
@@ -70,8 +98,14 @@ class QrCodeListView(ListAPIView):
     def get_queryset(self):
 
         is_trolleybus = self.request.query_params.get("is_trolleybus")
+        if is_trolleybus and not is_trolleybus.isdigit():
+            is_trolleybus = None
+
         # not transport id
         transport_number = self.request.query_params.get("transport_number")
+        if transport_number and not transport_number.isdigit():
+            transport_number = None
+
         if is_trolleybus and transport_number:
             transport_prefix = "Т" if is_trolleybus else "A"
             ind = f"{transport_prefix}_№{transport_number}"
@@ -81,4 +115,4 @@ class QrCodeListView(ListAPIView):
         if transport_reg_sign is not None:
             return self.queryset.filter(registration_sign__icontains=transport_reg_sign)
 
-        return self.queryset
+        return self.queryset.all()
