@@ -109,10 +109,14 @@ class QrCodeListView(ListAPIView):
         if is_trolleybus and transport_number:
             transport_prefix = "Т" if is_trolleybus else "A"
             ind = f"{transport_prefix}_№{transport_number}"
-            return self.queryset.filter(registration_sign__icontains=ind)
+            return self.queryset.filter(registration_sign__icontains=ind).order_by(
+                "-payment_date"
+            )
 
         transport_reg_sign = self.request.query_params.get("reg_sign")
         if transport_reg_sign is not None:
-            return self.queryset.filter(registration_sign__icontains=transport_reg_sign)
+            return self.queryset.filter(
+                registration_sign__icontains=transport_reg_sign
+            ).order_by("-payment_date")
 
-        return self.queryset.all()
+        return self.queryset.order_by("-payment_date")
