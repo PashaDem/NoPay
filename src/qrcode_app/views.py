@@ -66,3 +66,19 @@ class QrCodeListView(ListAPIView):
     permission_classes = (IsAuthenticated,)
     serializer_class = PublicTicketSerializer
     queryset = QRCode.objects.all()
+
+    def get_queryset(self):
+
+        is_trolleybus = self.request.query_params.get("is_trolleybus")
+        # not transport id
+        transport_number = self.request.query_params.get("transport_number")
+        if is_trolleybus and transport_number:
+            transport_prefix = "Т" if is_trolleybus else "A"
+            ind = f"{transport_prefix}_№{transport_number}"
+            return self.queryset.filter(registration_sign__icontains=ind)
+
+        transport_reg_sign = self.request.query_params.get("reg_sign")
+        if transport_reg_sign is not None:
+            return self.queryset.filter(registration_sign__icontains=transport_reg_sign)
+
+        return self.queryset

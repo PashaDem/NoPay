@@ -10,4 +10,4 @@ class UploadQRCodeSerializer(s.Serializer):
 class PublicTicketSerializer(s.ModelSerializer):
     class Meta:
         model = QRCode
-        fields = ("registration_sign", "transport_id")
+        fields = ("id", "registration_sign", "transport_id")
