@@ -5,14 +5,20 @@ from drf_spectacular.utils import (
     inline_serializer,
 )
 from rest_framework import serializers, status
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from image_service import FileService, MinioFileRepository, UploadFileError
 from qrcode_app.models import QRCode
-from qrcode_app.serializers import PublicTicketSerializer, UploadQRCodeSerializer
+from qrcode_app.permissions import IsOwnerOrAuthenticated
+from qrcode_app.serializers import (
+    PublicTicketSerializer,
+    QRCodePrivateSerializer,
+    QRCodePublicSerializer,
+    UploadQRCodeSerializer,
+)
 
 
 class UploadQRCodeAPIView(APIView):
@@ -61,9 +67,8 @@ class UploadQRCodeAPIView(APIView):
 
 
 @extend_schema_view(
-    list=extend_schema(
+    get=extend_schema(
         summary="Список доступных QR-кодов",
-        tags=["QRCODE"],
         parameters=[
             OpenApiParameter(
                 name="is_trolleybus",
@@ -120,3 +125,20 @@ class QrCodeListView(ListAPIView):
             ).order_by("-payment_date")
 
         return self.queryset.order_by("-payment_date")
+
+
+@extend_schema_view(
+    get=extend_schema(
+        summary="Получение QR кода по ID",
+        responses={status.HTTP_200_OK: QRCodePrivateSerializer},
+    )
+)
+class QRCodeDetailView(RetrieveAPIView):
+    permission_classes = (IsOwnerOrAuthenticated,)
+    queryset = QRCode.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.user == self.get_object().created_by:
+            return QRCodePrivateSerializer
+        else:
+            return QRCodePublicSerializer
