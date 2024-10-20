@@ -1,6 +1,6 @@
 from .errors import DownloadFileError, RemoveFileError, UploadFileError
 from .file_repo import IFileRepository
-from .file_service import FileService
+from .img_service import FileService
 from .minio_factory import MinioFileRepository
 from .parse_qrcode import parse_qrcode
 

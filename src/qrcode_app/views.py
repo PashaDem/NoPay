@@ -3,7 +3,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from file_service import FileService, MinioFileRepository, UploadFileError
+from image_service import FileService, MinioFileRepository, UploadFileError
 from qrcode_app.serializers import UploadQRCodeSerializer
 
 
