@@ -35,7 +35,12 @@ def parse_qrcode_task(filename: str, user_id: int) -> None:
         return
 
     try:
-        qrcode_text = decode(Image.open(local_filename))[0].data
+        decoded_qrcodes = decode(Image.open(local_filename))
+        if len(decoded_qrcodes):
+            qrcode_text = decoded_qrcodes[0].data
+        else:
+            logger.error("QR код не был найден")
+            return
     except Exception as err:
         logger.error(f"Ошибка во время парсинга картинки: {err}")
 
