@@ -12,13 +12,16 @@ from rest_framework.views import APIView
 
 from image_service import FileService, MinioFileRepository, UploadFileError
 from qrcode_app.models import QRCode
-from qrcode_app.permissions import IsOwnerOrAuthenticated
+from qrcode_app.permissions import IsOwnerOrAuthenticated, NotOwnerAndAuthenticated
 from qrcode_app.serializers import (
     PublicTicketSerializer,
     QRCodePrivateSerializer,
     QRCodePublicSerializer,
     UploadQRCodeSerializer,
 )
+
+from .errors import BaseQRCodeServiceError
+from .qrcode_service import QRCodeService
 
 
 class UploadQRCodeAPIView(APIView):
@@ -124,8 +127,6 @@ class QrCodeListView(ListAPIView):
                 registration_sign__icontains=transport_reg_sign
             ).order_by("-payment_date")
 
-        return self.queryset.order_by("-payment_date")
-
 
 @extend_schema_view(
     get=extend_schema(
@@ -142,3 +143,15 @@ class QRCodeDetailView(RetrieveAPIView):
             return QRCodePrivateSerializer
         else:
             return QRCodePublicSerializer
+
+
+class BuyQRCodeAPIView(APIView):
+    permission_classes = (NotOwnerAndAuthenticated,)
+
+    def post(self, request, pk):
+        service = QRCodeService()
+        try:
+            service.buy_qrcode(user=request.user, qrcode_id=pk)
+        except BaseQRCodeServiceError as err:
+            return Response({"message": str(err)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)

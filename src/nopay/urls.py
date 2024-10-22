@@ -16,4 +16,5 @@ urlpatterns = (
         "api/qrcode/",
         include("qrcode_app.urls"),
     ),
+    path("api/advertisement/", include("advertisement.urls")),
 )

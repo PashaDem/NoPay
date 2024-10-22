@@ -11,3 +11,12 @@ class IsOwnerOrAuthenticated(IsAuthenticated):
         # so we'll always allow GET, HEAD or OPTIONS requests.
         is_authenticated = super().has_object_permission(request, view, obj)
         return is_authenticated or (is_authenticated and obj.created_by == request.user)
+
+
+class NotOwnerAndAuthenticated(IsAuthenticated):
+    def has_object_permission(self, request, view, obj):
+        """
+        Нельзя приобрести свой QR-код. Он доступен пользователю по умолчанию
+        """
+        is_authenticated = super().has_object_permission(request, view, obj)
+        return obj.created_by != request.user and is_authenticated
