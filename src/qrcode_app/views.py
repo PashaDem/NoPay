@@ -1,3 +1,4 @@
+from django.db.models import Q
 from drf_spectacular.utils import (
     OpenApiParameter,
     extend_schema,
@@ -152,6 +153,20 @@ class QRCodeDetailView(RetrieveAPIView):
             return QRCodePublicSerializer
 
 
+@extend_schema_view(
+    post=extend_schema(
+        summary="Осуществление покупки qr-кода за токены",
+        responses={
+            status.HTTP_200_OK: None,
+            status.HTTP_400_BAD_REQUEST: inline_serializer(
+                name="Сообщение об ошибке при покупке QR-кода",
+                fields={
+                    "message": serializers.CharField(),
+                },
+            ),
+        },
+    )
+)
 class BuyQRCodeAPIView(APIView):
     permission_classes = (NotOwnerAndAuthenticated,)
 
@@ -162,3 +177,18 @@ class BuyQRCodeAPIView(APIView):
         except BaseQRCodeServiceError as err:
             return Response({"message": str(err)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(status=status.HTTP_200_OK)
+
+
+@extend_schema_view(
+    get=extend_schema(
+        summary="Получение QR-кодов, созданных или купленных пользователем",
+        responses={status.HTTP_200_OK: QRCodePrivateSerializer},
+    )
+)
+class UserQRCodesAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user = self.request.user
+        qs = QRCode.objects.filter(Q(users__in=[user]) | Q(created_by=user))
+        return Response(QRCodePrivateSerializer(qs, many=True).data)
