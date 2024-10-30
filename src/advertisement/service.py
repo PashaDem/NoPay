@@ -8,7 +8,7 @@ User = get_user_model()
 
 class AdvertisementService:
     @atomic
-    def process_advertisement_view(user: User) -> None:
+    def process_advertisement_view(self, user: User) -> None:
         """
         Пополняем баланс пользователя
         """

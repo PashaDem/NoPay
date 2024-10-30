@@ -139,7 +139,14 @@ class QRCodeDetailView(RetrieveAPIView):
     queryset = QRCode.objects.all()
 
     def get_serializer_class(self):
-        if self.request.user == self.get_object().created_by:
+        code = self.get_object()
+        user = self.request.user
+
+        if (
+            user == code.created_by
+            or code.users.filter(id=user.id).exists()
+            or user.is_superuser
+        ):
             return QRCodePrivateSerializer
         else:
             return QRCodePublicSerializer
