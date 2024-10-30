@@ -16,3 +16,6 @@ class QRCode(models.Model):
     created_by = models.ForeignKey(
         User, on_delete=models.CASCADE, verbose_name="Пользователь, выгрузивший токен"
     )
+    users = models.ManyToManyField(
+        User, related_name="qrcodes", verbose_name="Пользователи"
+    )

@@ -17,6 +17,7 @@ class QRCodePrivateSerializer(s.ModelSerializer):
     class Meta:
         model = QRCode
         fields = (
+            "id",
             "ticket_id",
             "transport_id",
             "payment_date",

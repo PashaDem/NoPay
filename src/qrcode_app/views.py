@@ -1,3 +1,4 @@
+from django.db.models import Q
 from drf_spectacular.utils import (
     OpenApiParameter,
     extend_schema,
@@ -12,13 +13,16 @@ from rest_framework.views import APIView
 
 from image_service import FileService, MinioFileRepository, UploadFileError
 from qrcode_app.models import QRCode
-from qrcode_app.permissions import IsOwnerOrAuthenticated
+from qrcode_app.permissions import IsOwnerOrAuthenticated, NotOwnerAndAuthenticated
 from qrcode_app.serializers import (
     PublicTicketSerializer,
     QRCodePrivateSerializer,
     QRCodePublicSerializer,
     UploadQRCodeSerializer,
 )
+
+from .errors import BaseQRCodeServiceError
+from .qrcode_service import QRCodeService
 
 
 class UploadQRCodeAPIView(APIView):
@@ -124,8 +128,6 @@ class QrCodeListView(ListAPIView):
                 registration_sign__icontains=transport_reg_sign
             ).order_by("-payment_date")
 
-        return self.queryset.order_by("-payment_date")
-
 
 @extend_schema_view(
     get=extend_schema(
@@ -138,7 +140,55 @@ class QRCodeDetailView(RetrieveAPIView):
     queryset = QRCode.objects.all()
 
     def get_serializer_class(self):
-        if self.request.user == self.get_object().created_by:
+        code = self.get_object()
+        user = self.request.user
+
+        if (
+            user == code.created_by
+            or code.users.filter(id=user.id).exists()
+            or user.is_superuser
+        ):
             return QRCodePrivateSerializer
         else:
             return QRCodePublicSerializer
+
+
+@extend_schema_view(
+    post=extend_schema(
+        summary="Осуществление покупки qr-кода за токены",
+        responses={
+            status.HTTP_200_OK: None,
+            status.HTTP_400_BAD_REQUEST: inline_serializer(
+                name="Сообщение об ошибке при покупке QR-кода",
+                fields={
+                    "message": serializers.CharField(),
+                },
+            ),
+        },
+    )
+)
+class BuyQRCodeAPIView(APIView):
+    permission_classes = (NotOwnerAndAuthenticated,)
+
+    def post(self, request, pk):
+        service = QRCodeService()
+        try:
+            service.buy_qrcode(user=request.user, qrcode_id=pk)
+        except BaseQRCodeServiceError as err:
+            return Response({"message": str(err)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_200_OK)
+
+
+@extend_schema_view(
+    get=extend_schema(
+        summary="Получение QR-кодов, созданных или купленных пользователем",
+        responses={status.HTTP_200_OK: QRCodePrivateSerializer},
+    )
+)
+class UserQRCodesAPIView(APIView):
+    permission_classes = (IsAuthenticated,)
+
+    def get(self, request):
+        user = self.request.user
+        qs = QRCode.objects.filter(Q(users__in=[user]) | Q(created_by=user))
+        return Response(QRCodePrivateSerializer(qs, many=True).data)

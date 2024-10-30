@@ -12,6 +12,7 @@ ALLOWED_HOSTS = ["*"]
 APPS = (
     "user_auth.apps.UserAuthConfig",
     "qrcode_app.apps.QrcodeAppConfig",
+    "advertisement.apps.AdvertisementConfig",
 )
 
 INSTALLED_APPS = [
