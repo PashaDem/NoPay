@@ -28,7 +28,6 @@ def parse_qrcode_task(filename: str, user_id: int) -> None:
 
     repo = MinioFileRepository()
     try:
-
         local_filename = repo.download_file_from_blob(
             settings.MINIO_BUCKET_NAME, filename
         )

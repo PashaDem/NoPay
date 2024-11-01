@@ -1,6 +1,8 @@
 from os import environ
 from pathlib import Path
 
+from celery.schedules import crontab
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = environ.get("DJANGO_SECRET_KEY")
@@ -27,6 +29,8 @@ INSTALLED_APPS = [
     "rest_framework.authtoken",
     "drf_spectacular",
     "django_extensions",
+    "django_celery_results",
+    "django_celery_beat",
     *APPS,
 ]
 
@@ -126,3 +130,22 @@ MINIO_BUCKET_NAME = "qrcodes"
 # Celery
 CELERY_BROKER_URL = "redis://redis:6379"
 CELERY_RESULT_BACKEND = "redis://redis:6379"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+
+# Cache settings
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        },
+    }
+}
+
+CELERY_BEAT_SCHEDULE = {
+    "clear_not_relevant_qrcodes": {
+        "task": "qrcode_app.tasks.clear_not_relevant_qrcodes",
+        "schedule": crontab(hour="*/2"),
+    },
+}

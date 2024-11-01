@@ -127,6 +127,7 @@ class QrCodeListView(ListAPIView):
             return self.queryset.filter(
                 registration_sign__icontains=transport_reg_sign
             ).order_by("-payment_date")
+        return self.queryset.all()
 
 
 @extend_schema_view(
