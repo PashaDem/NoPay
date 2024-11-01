@@ -25,6 +25,18 @@ services:
     depends_on:
       - web
 
+  celery_beat:
+    build:
+      context: .
+      dockerfile: celery_beat_dockerfile
+    command: sh celery-beat-entrypoint.sh
+    volumes:
+      - ./src:/src
+    env_file:
+      - .env
+    depends_on:
+      - web
+
   postgres_db:
     container_name: postgres_db
     image: postgres:16
