@@ -11,6 +11,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from common.order_by_payment_datetime import order_by_payment_datetime
 from image_service import FileService, MinioFileRepository, UploadFileError
 from qrcode_app.models import QRCode
 from qrcode_app.permissions import IsOwnerOrAuthenticated, NotOwnerAndAuthenticated
@@ -82,6 +83,20 @@ class UploadQRCodeAPIView(APIView):
                 type=int,
             ),
             OpenApiParameter(
+                name="is_train",
+                location=OpenApiParameter.QUERY,
+                description='Используется для фильтрации вместе с query параметром "transport_number". 1 = true, 0 = false',
+                required=False,
+                type=int,
+            ),
+            OpenApiParameter(
+                name="is_bus",
+                location=OpenApiParameter.QUERY,
+                description='Используется для фильтрации вместе с query параметром "transport_number". 1 = true, 0 = false',
+                required=False,
+                type=int,
+            ),
+            OpenApiParameter(
                 name="transport_number",
                 location=OpenApiParameter.QUERY,
                 description='Публичный номер транспорта - 10, 25, который указывается на автобусе/троллейбусе. Используется только вместе с query параметром "is_trolleybus".',
@@ -104,29 +119,35 @@ class QrCodeListView(ListAPIView):
     serializer_class = PublicTicketSerializer
     queryset = QRCode.objects.all()
 
+    @order_by_payment_datetime
     def get_queryset(self):
+        prefixes = {
+            "is_trolleybus": "Т",
+            "is_train": "Тр",
+            "is_bus": "А",
+        }
+        values = {
+            "is_trolleybus": self.request.query_params.get("is_trolleybus"),
+            "is_bus": self.request.query_params.get("is_bus"),
+            "is_train": self.request.query_params.get("is_train"),
+        }
 
-        is_trolleybus = self.request.query_params.get("is_trolleybus")
-        if is_trolleybus and not is_trolleybus.isdigit():
-            is_trolleybus = None
+        prefix = None
+        for key, val in values.items():
+            if val and val.isdigit():
+                prefix = prefixes[key]
 
         # not transport id
         transport_number = self.request.query_params.get("transport_number")
-        if transport_number and not transport_number.isdigit():
-            transport_number = None
 
-        if is_trolleybus and transport_number:
-            transport_prefix = "Т" if is_trolleybus else "A"
-            ind = f"{transport_prefix}_№{transport_number}"
-            return self.queryset.filter(registration_sign__icontains=ind).order_by(
-                "-payment_date"
-            )
+        if prefix and transport_number:
+            ind = f"{prefix}_№{transport_number}"
+            return self.queryset.filter(registration_sign__icontains=ind)
 
         transport_reg_sign = self.request.query_params.get("reg_sign")
         if transport_reg_sign is not None:
-            return self.queryset.filter(
-                registration_sign__icontains=transport_reg_sign
-            ).order_by("-payment_date")
+            return self.queryset.filter(registration_sign__icontains=transport_reg_sign)
+
         return self.queryset.all()
 
 
