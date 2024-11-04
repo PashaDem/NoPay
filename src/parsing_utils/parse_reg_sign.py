@@ -1,23 +1,32 @@
 import binascii
 from base64 import b64decode
-from datetime import datetime
+from datetime import date, datetime, time
 from logging import getLogger
-from typing import TypedDict
+from typing import NotRequired, TypedDict
+
+from django.contrib.auth import get_user_model
 
 from .errors import InvalidTokenError
 
 logger = getLogger(__name__)
 
+User = get_user_model()
+
 
 class TokenData(TypedDict):
     transport_id: str
-    payment_date: datetime.date
-    payment_time: datetime.time
+    payment_date: date
+    payment_time: time
     ticket_id: str
     qr_token: str
+    registration_sign: NotRequired[str]
+    created_by: NotRequired[User]
 
 
 def parse_qrcode_content(content: str) -> TokenData:
+    """
+    :raises InvalidTokenError: неверный формат сообщения
+    """
     try:
         decoded_content = b64decode(content).decode()
     except binascii.Error as err:
@@ -40,7 +49,7 @@ def parse_qrcode_content(content: str) -> TokenData:
         datetime_obj = datetime.strptime(date_and_time, "%Y-%m-%dT%H:%M:%S.%f")
     except ValueError as err:
         logger.error(f"Ошибка во время парсинга даты: {err}")
-        return InvalidTokenError
+        raise InvalidTokenError
 
     payment_time = datetime_obj.time()
     payment_date = datetime_obj.date()

@@ -1,23 +1,24 @@
 import os
+from datetime import datetime, timedelta
 
 from celery import shared_task
 from celery.utils.log import get_task_logger
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
+from feature_toggles.models import FeatureToggles
+from image_service.minio_factory import MinioFileRepository
 from parsing_utils.errors import BaseParsingError
 from parsing_utils.parse_minsktrans_token import parse_image_text
 from parsing_utils.parse_reg_sign import parse_qrcode_content
 from qrcode_app.models import QRCode
-
-from .minio_factory import MinioFileRepository
 
 logger = get_task_logger(__name__)
 
 User = get_user_model()
 
 
-def parse_qrcode(filename: str, user_id: int):
+def parse_qrcode(filename: str, user_id: int) -> None:
     parse_qrcode_task.delay(filename, user_id)
 
 
@@ -35,6 +36,7 @@ def parse_qrcode_task(filename: str, user_id: int) -> None:
         logger.error(f"Ошибка скачивания файла : {err} | filename: {filename}")
         return
 
+    qrcode_text = None
     try:
         decoded_qrcodes = decode(Image.open(local_filename))
         if len(decoded_qrcodes):
@@ -51,6 +53,18 @@ def parse_qrcode_task(filename: str, user_id: int) -> None:
         logger.error(err)
         return
 
+    date = qrcode_payload["payment_date"]
+    time = qrcode_payload["payment_time"]
+    datetime_obj = datetime.combine(date, time)
+
+    if (
+        FeatureToggles.restrict_old_qrcodes
+        and datetime_obj
+        < datetime.now() - timedelta(hours=settings.QRCODE_EXPIRATION_HOURS)
+    ):
+        logger.error("Неактуальный QR-код")
+        return
+
     # parse text from ticket image
     registration_sign = parse_image_text(local_filename)
 
@@ -60,6 +74,11 @@ def parse_qrcode_task(filename: str, user_id: int) -> None:
             "created_by": User.objects.get(id=user_id),
         }
     )
+
+    ticket_id = qrcode_payload["ticket_id"]
+    if QRCode.objects.filter(ticket_id=ticket_id).exists():
+        logger.error("Данный QR-код уже был подгружен")
+        return
 
     QRCode.objects.create(**qrcode_payload)
     repo.remove_file_from_blob(settings.MINIO_BUCKET_NAME, filename)
