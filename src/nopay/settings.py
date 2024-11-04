@@ -15,6 +15,7 @@ APPS = (
     "user_auth.apps.UserAuthConfig",
     "qrcode_app.apps.QrcodeAppConfig",
     "advertisement.apps.AdvertisementConfig",
+    "feature_toggles.apps.FeatureTogglesConfig",
 )
 
 INSTALLED_APPS = [
@@ -143,9 +144,11 @@ CACHES = {
     }
 }
 
+QRCODE_EXPIRATION_HOURS = environ.get("QRCODE_EXPIRATION_TIME", 2)
+
 CELERY_BEAT_SCHEDULE = {
     "clear_not_relevant_qrcodes": {
         "task": "qrcode_app.tasks.clear_not_relevant_qrcodes",
-        "schedule": crontab(hour="*/2"),
+        "schedule": crontab(hour=f"*/{QRCODE_EXPIRATION_HOURS}"),
     },
 }

@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 PARSING_PATTERN = r"Рег\.знак:.*?\)\."
 
 
-def parse_image_text(local_filename: Path) -> str:
+def parse_image_text(local_filename: str | Path) -> str:
     import pyocr
     import pyocr.builders
 

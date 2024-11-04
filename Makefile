@@ -6,3 +6,8 @@ run:
 
 down:
 	docker compose down
+
+migr:
+	./src/manage.py makemigrations
+
+restart: down build
