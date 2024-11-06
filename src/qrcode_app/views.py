@@ -138,9 +138,9 @@ class QrCodeListView(ListAPIView):
                 prefix = prefixes[key]
 
         # not transport id
-        transport_number = self.request.query_params.get("transport_number")
+        transport_number = self.request.query_params.get("transport_number", "")
 
-        if prefix and transport_number:
+        if prefix and transport_number is not None:
             ind = f"{prefix}_№{transport_number}"
             return self.queryset.filter(registration_sign__icontains=ind)
 
