@@ -2,9 +2,8 @@ from django.contrib.auth import get_user_model
 from django.db.transaction import atomic
 
 from advertisement.models import Balance, Payout
-
-from .errors import NotEnoughTokens, QRCodeAlreadyPurchased, QRCodeNotFound
-from .models import QRCode
+from qrcode_app.errors import NotEnoughTokens, QRCodeAlreadyPurchased, QRCodeNotFound
+from qrcode_app.models import QRCode
 
 User = get_user_model()
 

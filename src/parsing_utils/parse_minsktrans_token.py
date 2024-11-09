@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PIL import Image
 
-from .errors import NoRegistrationSignError
+from parsing_utils.errors import NoRegistrationSignError
 
 logger = logging.getLogger(__name__)
 PARSING_PATTERN = r"Рег\.знак:.*?\)\."

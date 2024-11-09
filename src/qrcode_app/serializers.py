@@ -1,6 +1,6 @@
 from rest_framework import serializers as s
 
-from .models import QRCode
+from qrcode_app.models import QRCode
 
 
 class UploadQRCodeSerializer(s.Serializer):

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import FeatureToggle
+from feature_toggles.models import FeatureToggle
 
 
 @admin.register(FeatureToggle)
