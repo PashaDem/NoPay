@@ -27,6 +27,10 @@ def parse_qrcode_task(filename: str, user_id: int) -> None:
     from PIL import Image
     from pyzbar.pyzbar import decode
 
+    from qrcode_app.models import QRCodeProcessingStatus
+
+    user = User.objects.get(id=user_id)
+
     repo = MinioFileRepository()
     try:
         local_filename = repo.download_file_from_blob(
@@ -34,22 +38,42 @@ def parse_qrcode_task(filename: str, user_id: int) -> None:
         )
     except Exception as err:
         logger.error(f"Ошибка скачивания файла : {err} | filename: {filename}")
+        QRCodeProcessingStatus.objects.create(
+            created_by=user,
+            status=QRCodeProcessingStatus.ERROR,
+            description="Невозможно обработать файл из-за внутренней ошибки системы",
+        )
         return
 
-    qrcode_text = None
     try:
         decoded_qrcodes = decode(Image.open(local_filename))
         if len(decoded_qrcodes):
             qrcode_text = decoded_qrcodes[0].data
         else:
+            QRCodeProcessingStatus.objects.create(
+                created_by=user,
+                status=QRCodeProcessingStatus.ERROR,
+                description="Система не может распознать QR-код в данном файле.",
+            )
             logger.error("QR код не был найден")
             return
     except Exception as err:
+        QRCodeProcessingStatus.objects.create(
+            created_by=user,
+            status=QRCodeProcessingStatus.ERROR,
+            description="Система не может распознать QR-код в данном файле.",
+        )
         logger.error(f"Ошибка во время парсинга картинки: {err}")
+        return
 
     try:
         qrcode_payload = parse_qrcode_content(qrcode_text)
     except BaseParsingError as err:
+        QRCodeProcessingStatus.objects.create(
+            created_by=user,
+            status=QRCodeProcessingStatus.ERROR,
+            description="Неверный формат QR-кода.",
+        )
         logger.error(err)
         return
 
@@ -62,21 +86,40 @@ def parse_qrcode_task(filename: str, user_id: int) -> None:
         and datetime_obj
         < datetime.now() - timedelta(hours=settings.QRCODE_EXPIRATION_HOURS)
     ):
+        QRCodeProcessingStatus.objects.create(
+            created_by=user,
+            status=QRCodeProcessingStatus.ERROR,
+            description="Срок действия QR-кода истек.",
+        )
         logger.error("Неактуальный QR-код")
         return
 
     # parse text from ticket image
-    registration_sign = parse_image_text(local_filename)
+    try:
+        registration_sign = parse_image_text(local_filename)
+    except BaseParsingError as err:
+        QRCodeProcessingStatus.objects.create(
+            created_by=user,
+            status=QRCodeProcessingStatus.ERROR,
+            description="Система не может распознать регистрационный знак в данном файле.",
+        )
+        logger.error(err)
+        return
 
     qrcode_payload.update(
         {
             "registration_sign": registration_sign,
-            "created_by": User.objects.get(id=user_id),
+            "created_by": user,
         }
     )
 
     ticket_id = qrcode_payload["ticket_id"]
     if QRCode.objects.filter(ticket_id=ticket_id).exists():
+        QRCodeProcessingStatus.objects.create(
+            created_by=user,
+            status=QRCodeProcessingStatus.ERROR,
+            description="Данный QR-код уже был внесен в систему.",
+        )
         logger.error("Данный QR-код уже был подгружен")
         return
 

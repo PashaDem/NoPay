@@ -1,6 +1,6 @@
 from rest_framework import serializers as s
 
-from qrcode_app.models import QRCode
+from qrcode_app.models import QRCode, QRCodeProcessingStatus
 
 
 class UploadQRCodeSerializer(s.Serializer):
@@ -37,4 +37,21 @@ class QRCodePublicSerializer(s.ModelSerializer):
             "ticket_id",
             "payment_date",
             "payment_time",
+        )
+
+
+class QRCodeProcessingStatusSerializer(s.ModelSerializer):
+    class Meta:
+        """
+        Поле qrcode, чтобы на клиенте можно было бы сделать редирект
+        на конкретный qr-код.
+        """
+
+        model = QRCodeProcessingStatus
+        fields = (
+            "created_by",
+            "status",
+            "description",
+            "created_at",
+            "qrcode",
         )
