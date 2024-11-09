@@ -4,7 +4,7 @@ from django.conf import settings
 from minio import Minio
 from minio.error import S3Error
 
-from .errors import DownloadFileError, RemoveFileError, UploadFileError
+from image_service.errors import DownloadFileError, RemoveFileError, UploadFileError
 
 logger = getLogger(__name__)
 

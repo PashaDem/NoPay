@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.db.transaction import atomic
 
-from .models import Balance, Payout
+from advertisement.models import Balance, Payout
 
 User = get_user_model()
 

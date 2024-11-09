@@ -8,7 +8,7 @@ from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .serializers import RegisterUserSerializer, UserLoginSerializer
+from user_auth.serializers import RegisterUserSerializer, UserLoginSerializer
 
 User = get_user_model()
 

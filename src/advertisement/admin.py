@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Balance, Payout
+from advertisement.models import Balance, Payout
 
 
 @admin.register(Balance)

@@ -3,8 +3,8 @@ from uuid import uuid1
 
 from django.conf import settings
 
-from .file_repo import IFileRepository
-from .parse_qrcode import parse_qrcode
+from image_service.file_repo import IFileRepository
+from image_service.parse_qrcode import parse_qrcode
 
 
 class FileService:

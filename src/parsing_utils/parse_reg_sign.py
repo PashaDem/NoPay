@@ -6,7 +6,7 @@ from typing import NotRequired, TypedDict
 
 from django.contrib.auth import get_user_model
 
-from .errors import InvalidTokenError
+from parsing_utils.errors import InvalidTokenError
 
 logger = getLogger(__name__)
 

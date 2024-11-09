@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import (
+from qrcode_app.views import (
     BuyQRCodeAPIView,
     QRCodeDetailView,
     QrCodeListView,
