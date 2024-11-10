@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 
 from advertisement.models import Balance
 from advertisement.serializers import BalanceSerializer
-from advertisement.service import AdvertisementService
+from advertisement.service import PaymentService
 
 
 @extend_schema_view(
@@ -19,7 +19,7 @@ class ViewAdvertisementAPIView(APIView):
     permission_classes = (IsAuthenticated,)
 
     def post(self, request):
-        service = AdvertisementService()
+        service = PaymentService()
         service.process_advertisement_view(request.user)
         return Response(status=status.HTTP_200_OK)
 

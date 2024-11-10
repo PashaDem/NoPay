@@ -27,6 +27,7 @@ def parse_qrcode_task(filename: str, user_id: int) -> None:
     from PIL import Image
     from pyzbar.pyzbar import decode
 
+    from advertisement.service import PaymentService
     from qrcode_app.models import QRCodeProcessingStatus
 
     user = User.objects.get(id=user_id)
@@ -129,6 +130,10 @@ def parse_qrcode_task(filename: str, user_id: int) -> None:
         status=QRCodeProcessingStatus.SUCCESS,
         description="QR-код был корректно обработан!",
     )
+
+    service = PaymentService()
+    service.process_qrcode_uploading(user=user)
+
     repo.remove_file_from_blob(settings.MINIO_BUCKET_NAME, filename)
 
     if os.path.exists(local_filename):

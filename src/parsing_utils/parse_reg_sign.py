@@ -61,5 +61,5 @@ def parse_qrcode_content(content: str) -> TokenData:
         "payment_date": payment_date,
         "payment_time": payment_time,
         "ticket_id": ticket_id,
-        "qr_token": decoded_content,
+        "qr_token": content.decode(),
     }
