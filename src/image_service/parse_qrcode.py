@@ -124,6 +124,11 @@ def parse_qrcode_task(filename: str, user_id: int) -> None:
         return
 
     QRCode.objects.create(**qrcode_payload)
+    QRCodeProcessingStatus.objects.create(
+        created_by=user,
+        status=QRCodeProcessingStatus.SUCCESS,
+        description="QR-код был корректно обработан!",
+    )
     repo.remove_file_from_blob(settings.MINIO_BUCKET_NAME, filename)
 
     if os.path.exists(local_filename):

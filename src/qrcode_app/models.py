@@ -45,3 +45,6 @@ class QRCodeProcessingStatus(models.Model):
     )
     # быстрый поиск уведомлений для пользователя
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    was_seen_by_user = models.BooleanField(
+        default=False, verbose_name="Видел ли пользователь это уведомление?"
+    )

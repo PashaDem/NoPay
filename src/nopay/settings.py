@@ -153,3 +153,7 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=f"*/{QRCODE_EXPIRATION_HOURS}"),
     },
 }
+
+NOTIFICATIONS_CHECK_TIMEOUT_SEC = int(
+    environ.get("NOTIFICATIONS_CHECK_TIMEOUT_SEC", 30)
+)

@@ -45,10 +45,12 @@ class QRCodeProcessingStatusSerializer(s.ModelSerializer):
         """
         Поле qrcode, чтобы на клиенте можно было бы сделать редирект
         на конкретный qr-код.
+        id передаем, чтобы клиент мог сообщить о просмотре нотификашки.
         """
 
         model = QRCodeProcessingStatus
         fields = (
+            "id",
             "created_by",
             "status",
             "description",
