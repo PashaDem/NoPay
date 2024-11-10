@@ -57,3 +57,7 @@ class QRCodeProcessingStatusSerializer(s.ModelSerializer):
             "created_at",
             "qrcode",
         )
+
+
+class ViewNotificationSerializer(s.Serializer):
+    notification_ids = s.ListField(child=s.IntegerField())

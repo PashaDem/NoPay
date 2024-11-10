@@ -1,3 +1,4 @@
+import os
 from os import environ
 from pathlib import Path
 
@@ -31,7 +32,9 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "rest_framework.authtoken",
+    "drf_spectacular_websocket",
     "drf_spectacular",
+    "drf_spectacular_sidecar",
     "django_extensions",
     "django_celery_results",
     "django_celery_beat",
@@ -161,3 +164,17 @@ NOTIFICATIONS_CHECK_TIMEOUT_SEC = int(
 TOKENS_PAYOUT_COUNT_ON_UPLOADING = int(
     environ.get("TOKENS_PAYOUT_COUNT_ON_UPLOADING", 3)
 )
+
+SPECTACULAR_SETTINGS = {
+    "DEFAULT_GENERATOR_CLASS": "drf_spectacular_websocket.schemas.WsSchemaGenerator",
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
+    "SWAGGER_UI_SETTINGS": {
+        "connectSocket": True,  # Automatically establish a WS connection when opening swagger
+        "socketMaxMessages": 8,  # Max number of messages displayed in the log window in swagger
+        "socketMessagesInitialOpened": False,  # Automatically open the log window when opening swagger
+    },
+}
+
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
