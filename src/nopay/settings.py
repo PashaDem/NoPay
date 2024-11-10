@@ -3,6 +3,8 @@ from pathlib import Path
 
 from celery.schedules import crontab
 
+ASGI_APPLICATION = "nopay.asgi.application"
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = environ.get("DJANGO_SECRET_KEY")
@@ -19,6 +21,7 @@ APPS = (
 )
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -32,6 +35,7 @@ INSTALLED_APPS = [
     "django_extensions",
     "django_celery_results",
     "django_celery_beat",
+    "channels",
     *APPS,
 ]
 
@@ -108,7 +112,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Donwloading files into celery
 DOWNLOAD_DIR = "/usr/src/app/files/"
 
-
 # REST SETTINGS
 
 REST_FRAMEWORK = {
@@ -120,13 +123,11 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-
 # Minio settings
 MINIO_HOST = "minio:9000"
 MINIO_DJANGO_USER = environ.get("MINIO_DJANGO_USER")
 MINIO_DJANGO_PASSWORD = environ.get("MINIO_DJANGO_PASSWORD")
 MINIO_BUCKET_NAME = "qrcodes"
-
 
 # Celery
 CELERY_BROKER_URL = "redis://redis:6379"
