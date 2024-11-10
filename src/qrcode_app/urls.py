@@ -1,5 +1,6 @@
 from django.urls import path
 
+from qrcode_app.consumers import NotificationConsumer
 from qrcode_app.views import (
     BuyQRCodeAPIView,
     QRCodeDetailView,
@@ -14,4 +15,8 @@ urlpatterns = [
     path("qr_codes/<int:pk>/", QRCodeDetailView.as_view(), name="qr_code_detail"),
     path("qr_codes/<int:pk>/buy", BuyQRCodeAPIView.as_view(), name="buy_qr_code"),
     path("qr_codes/my", UserQRCodesAPIView.as_view(), name="my_qr_codes"),
+]
+
+websocket_urlpatterns = [
+    path("my_notifications/", NotificationConsumer.as_asgi(), name="my_notifications"),
 ]

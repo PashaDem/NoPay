@@ -1,6 +1,6 @@
 from rest_framework import serializers as s
 
-from qrcode_app.models import QRCode
+from qrcode_app.models import QRCode, QRCodeProcessingStatus
 
 
 class UploadQRCodeSerializer(s.Serializer):
@@ -38,3 +38,26 @@ class QRCodePublicSerializer(s.ModelSerializer):
             "payment_date",
             "payment_time",
         )
+
+
+class QRCodeProcessingStatusSerializer(s.ModelSerializer):
+    class Meta:
+        """
+        Поле qrcode, чтобы на клиенте можно было бы сделать редирект
+        на конкретный qr-код.
+        id передаем, чтобы клиент мог сообщить о просмотре нотификашки.
+        """
+
+        model = QRCodeProcessingStatus
+        fields = (
+            "id",
+            "created_by",
+            "status",
+            "description",
+            "created_at",
+            "qrcode",
+        )
+
+
+class ViewNotificationSerializer(s.Serializer):
+    notification_ids = s.ListField(child=s.IntegerField())

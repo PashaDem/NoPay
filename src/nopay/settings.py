@@ -1,13 +1,16 @@
+import os
 from os import environ
 from pathlib import Path
 
 from celery.schedules import crontab
 
+ASGI_APPLICATION = "nopay.asgi.application"
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = environ.get("DJANGO_SECRET_KEY")
 
-DEBUG = environ.get("DEBUG")
+DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
@@ -19,6 +22,7 @@ APPS = (
 )
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -28,10 +32,13 @@ INSTALLED_APPS = [
     "rest_framework",
     "corsheaders",
     "rest_framework.authtoken",
+    "drf_spectacular_websocket",
     "drf_spectacular",
+    "drf_spectacular_sidecar",
     "django_extensions",
     "django_celery_results",
     "django_celery_beat",
+    "channels",
     *APPS,
 ]
 
@@ -108,7 +115,6 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Donwloading files into celery
 DOWNLOAD_DIR = "/usr/src/app/files/"
 
-
 # REST SETTINGS
 
 REST_FRAMEWORK = {
@@ -120,13 +126,11 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
 
-
 # Minio settings
 MINIO_HOST = "minio:9000"
 MINIO_DJANGO_USER = environ.get("MINIO_DJANGO_USER")
 MINIO_DJANGO_PASSWORD = environ.get("MINIO_DJANGO_PASSWORD")
 MINIO_BUCKET_NAME = "qrcodes"
-
 
 # Celery
 CELERY_BROKER_URL = "redis://redis:6379"
@@ -152,3 +156,25 @@ CELERY_BEAT_SCHEDULE = {
         "schedule": crontab(hour=f"*/{QRCODE_EXPIRATION_HOURS}"),
     },
 }
+
+NOTIFICATIONS_CHECK_TIMEOUT_SEC = int(
+    environ.get("NOTIFICATIONS_CHECK_TIMEOUT_SEC", 30)
+)
+
+TOKENS_PAYOUT_COUNT_ON_UPLOADING = int(
+    environ.get("TOKENS_PAYOUT_COUNT_ON_UPLOADING", 3)
+)
+
+SPECTACULAR_SETTINGS = {
+    "DEFAULT_GENERATOR_CLASS": "drf_spectacular_websocket.schemas.WsSchemaGenerator",
+    "SWAGGER_UI_DIST": "SIDECAR",
+    "SWAGGER_UI_FAVICON_HREF": "SIDECAR",
+    "REDOC_DIST": "SIDECAR",
+    "SWAGGER_UI_SETTINGS": {
+        "connectSocket": True,  # Automatically establish a WS connection when opening swagger
+        "socketMaxMessages": 8,  # Max number of messages displayed in the log window in swagger
+        "socketMessagesInitialOpened": False,  # Automatically open the log window when opening swagger
+    },
+}
+
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
