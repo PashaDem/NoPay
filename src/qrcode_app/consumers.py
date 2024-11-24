@@ -86,7 +86,7 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
             await self.send_json({"message": f"Invalid message format: {err}"})
         else:
             await QRCodeProcessingStatus.objects.filter(
-                id__in=serializer.notification_ids
+                id__in=serializer.validated_data["notification_ids"]
             ).aupdate(was_seen_by_user=True)
 
     async def disconnect(self, code):
