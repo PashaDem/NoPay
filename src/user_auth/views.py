@@ -25,7 +25,7 @@ class RegisterUserAPIView(APIView):
                 name="Информация о пользователе и токен",
                 fields={
                     "user_id": serializers.IntegerField(),
-                    "access_token": serializers.CharField(),
+                    "token": serializers.CharField(),
                 },
             ),
             status.HTTP_400_BAD_REQUEST: None,
@@ -39,7 +39,7 @@ class RegisterUserAPIView(APIView):
 
         token, _ = Token.objects.get_or_create(user=user)
         return Response(
-            data={"user_id": user.id, "access_token": token.key},
+            data={"user_id": user.id, "token": token.key},
             status=status.HTTP_201_CREATED,
         )
 
@@ -56,7 +56,7 @@ class LoginUserAPIView(APIView):
                 name="Информация о пользователе и токен",
                 fields={
                     "user_id": serializers.IntegerField(),
-                    "access_token": serializers.CharField(),
+                    "token": serializers.CharField(),
                 },
             ),
             status.HTTP_400_BAD_REQUEST: OpenApiResponse(
