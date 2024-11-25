@@ -24,6 +24,7 @@ services:
       - .env
     depends_on:
       - web
+    restart: always
 
   celery_beat:
     build:
@@ -36,6 +37,7 @@ services:
       - .env
     depends_on:
       - web
+    restart: always
 
   postgres_db:
     container_name: postgres_db
@@ -51,6 +53,7 @@ services:
       interval: 5s
       timeout: 3s
       retries: 3
+    restart: always
 
   minio:
     image: quay.io/minio/minio:latest
@@ -62,6 +65,7 @@ services:
     env_file:
       - .env
     command: minio server /data
+    restart: always
 
   redis:
     image: redis:6.0.7
